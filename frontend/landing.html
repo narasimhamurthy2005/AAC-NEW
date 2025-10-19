@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood Metrics Landing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    /* === Colors & Gradients === */
+    :root {
+      --primary: #007FFF;
+      --secondary: #AB4DFF;
+      --accent: #00E5FF;
+      --background: #0D1B2A;
+      --foreground: #F2F2F2;
+      --muted: #999999;
+      --card: #1B263B;
+      --success: #4CAF50;
+      --radius: 0.75rem;
+      --shadow-glow: 0 0 40px rgba(0, 127, 255, 0.3);
+      --shadow-card: 0 10px 30px rgba(27, 38, 59, 0.5);
+      --navbar-height: 80px;
+    }
+
+    body {
+      margin:0;
+      font-family: system-ui, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* Navbar */
+    nav {
+      position: fixed; top:0; width:100%; background: var(--card); padding:1rem 0;
+      z-index:100; box-shadow: var(--shadow-glow); display: flex; justify-content: center;
+    }
+    nav .nav-container { width: 100%; display: flex; justify-content: space-between; align-items: center; max-width:1200px; }
+    .logo { display: flex; align-items:center; font-size:1.5rem; font-weight:bold; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; cursor:pointer; }
+    .logo i { margin-right: 0.5rem; }
+    .nav-links { display: flex; gap: 1rem; align-items:center; }
+    .nav-links a { padding:0.5rem 1rem; border-radius:var(--radius); transition:0.3s; color: var(--foreground); }
+    .nav-links a:hover { background: var(--primary); color: #fff; }
+    .btn { padding:0.5rem 1rem; border-radius:var(--radius); font-weight:bold; transition:0.3s; border:2px solid var(--primary); cursor:pointer; background:transparent; color: var(--primary); }
+    .btn.primary { background: var(--primary); color:#fff; }
+    .btn.primary:hover { background: var(--secondary); }
+
+    /* Hero */
+    .hero { padding: calc(var(--navbar-height) + 4rem) 0 4rem; text-align: center; }
+    .hero .badge { display: inline-flex; align-items:center; gap:0.5rem; background: rgba(0,127,255,0.1); color: var(--primary); padding:0.5rem 1rem; border-radius:9999px; border:1px solid rgba(0,127,255,0.3); margin-bottom:1rem; font-size:0.9rem; font-weight:500;}
+    .hero h1 { font-size:3rem; font-weight:bold; margin-bottom:1rem; line-height:1.2; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero h1 span { color: var(--foreground); }
+    .hero p { font-size:1.25rem; margin-bottom:2rem; max-width:600px; margin-left:auto; margin-right:auto; color: var(--foreground);}
+    .btn-group { display: inline-flex; gap: 1rem; flex-wrap: wrap; justify-content:center; }
+    .btn-lg { padding:0.75rem 1.5rem; font-weight:bold; border:none; border-radius:var(--radius); cursor:pointer; transition:0.3s; }
+    .btn-lg.primary { background: var(--primary); color:#fff; }
+    .btn-lg.primary:hover { background: var(--secondary); }
+    .btn-lg.outline { background:transparent; border:2px solid var(--primary); color: var(--primary); }
+    .btn-lg.outline:hover { background: var(--primary); color:#fff; }
+
+    /* Hero Stats */
+    .hero-stats { margin-top:3rem; display: grid; grid-template-columns: repeat(2,1fr); gap:1rem; max-width:700px; margin-left:auto; margin-right:auto; }
+    .hero-stats .stat { background: rgba(27,38,59,0.5); border-radius:var(--radius); padding:1rem; text-align:center; }
+    .stat .value { font-size:1.5rem; font-weight:bold; margin-bottom:0.25rem; }
+    .stat.accuracy .value { color: var(--success); }
+    .stat.response .value { color: var(--accent); }
+    .stat.emotions .value { color: var(--secondary); }
+    .stat.support .value { color: var(--primary); }
+
+    /* Features */
+    section { scroll-margin-top: var(--navbar-height); } /* offset for fixed navbar */
+    .features { padding:4rem 0; }
+    .features h2 { text-align:center; font-size:2rem; margin-bottom:1rem; }
+    .features p { text-align:center; color: var(--muted); margin-bottom:2rem; max-width:700px; margin-left:auto; margin-right:auto;}
+    .feature-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:2rem; }
+    .feature-card { background: var(--card); color: var(--foreground); padding:2rem; border-radius:var(--radius); box-shadow: var(--shadow-card); transition:0.3s; }
+    .feature-card:hover { transform: translateY(-5px);}
+    .feature-card i { font-size:2rem; color: var(--primary); margin-bottom:1rem; }
+
+    /* CTA */
+    .cta { padding:4rem 0; text-align:center; }
+    .cta .cta-card { background: var(--card); padding:3rem; border-radius:var(--radius); box-shadow: var(--shadow-card); max-width:700px; margin:0 auto;}
+    .cta .cta-card h2 { font-size:2rem; margin-bottom:1rem;}
+    .cta .cta-card p { color: var(--muted); margin-bottom:1.5rem;}
+    .cta .btn-group { justify-content:center; }
+
+    /* Footer */
+    footer { background: var(--card); padding:3rem 0; color: var(--foreground);}
+    footer .footer-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:2rem; max-width:1200px; margin:0 auto; }
+    footer h4 { margin-bottom:1rem;}
+    footer a { display:block; margin-bottom:0.5rem; color: var(--foreground); transition:0.3s; }
+    footer a:hover { color: var(--primary); }
+
+    /* Responsive */
+    @media(min-width:768px){ .hero-stats{grid-template-columns:repeat(4,1fr);} }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-container container">
+      <div class="logo" onclick="window.location.href='index.html';"><i class="fas fa-chart-bar"></i> Mood Metrics</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="usecases.html">Use Cases</a>
+        <a href="login.html" class="btn">Login</a>
+        <a href="dashboard.html" class="btn primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge"><i class="fas fa-sparkles"></i> Advanced AI Emotion Recognition</div>
+      <h1>Understand Emotions<br><span>Like Never Before</span></h1>
+      <p>Harness the power of AI to analyze emotions across text, speech, and video, with enterprise-grade accuracy.</p>
+      
+      <div class="btn-group" style="justify-content:center;">
+         <a href="dashboard.html" class="btn-lg primary">Let's Start <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat accuracy"><div class="value">98.5%</div>Accuracy</div>
+        <div class="stat response"><div class="value">150ms</div>Response Time</div>
+        <div class="stat emotions"><div class="value">50+</div>Emotions</div>
+        <div class="stat support"><div class="value">24/7</div>Support</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features container">
+    <h2>Powerful Features for Every Use Case</h2>
+    <p>From real-time conversations to comprehensive video analysis, our platform delivers professional-grade emotion recognition.</p>
+    <div class="feature-grid">
+      <div class="feature-card"><i class="fas fa-comment-alt"></i><h3>AI-Powered Chatbot</h3><p>Intelligent emotion detection in real-time conversations with advanced sentiment analysis.</p></div>
+      <div class="feature-card"><i class="fas fa-file-alt"></i><h3>Text Emotion Analysis</h3><p>Analyze emotions in documents, messages, and written content with high accuracy.</p></div>
+      <div class="feature-card"><i class="fas fa-microphone"></i><h3>Speech Recognition</h3><p>Extract emotions from voice patterns and speech tone for comprehensive analysis.</p></div>
+      <div class="feature-card"><i class="fas fa-video"></i><h3>Video Emotion Detection</h3><p>Advanced facial expression analysis and emotion tracking in video content.</p></div>
+      <div class="feature-card"><i class="fas fa-chart-bar"></i><h3>Advanced Analytics</h3><p>Comprehensive reporting and insights with detailed emotion metrics and trends.</p></div>
+      <div class="feature-card"><i class="fas fa-shield-alt"></i><h3>Enterprise Security</h3><p>Bank-level security with end-to-end encryption for sensitive emotion data.</p></div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="cta-card">
+      <h2>Ready to Transform Your Understanding of Emotions?</h2>
+      <p>Join thousands of professionals using Mood Metrics to unlock deeper insights into human emotions and sentiment.</p>
+      <div class="btn-group">
+        <a href="dashboard.html" class="btn-lg primary">Start you free trail <i class="fas fa-arrow-right"></i></a>
+        <button class="btn-lg outline">Contact Sales</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="logo"><i class="fas fa-chart-bar"></i> Mood Metrics</div>
+        <p>Advanced emotion recognition platform powered by cutting-edge AI technology.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#">API Documentation</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="#about">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Careers</a>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:2rem; color: var(--muted);">&copy; 2024 Mood Metrics. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

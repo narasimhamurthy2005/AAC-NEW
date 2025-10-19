@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text Emotion Analysis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Gradients & colors */
+    .bg-gradient-card {
+      background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
+    }
+    .bg-gradient-primary {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    }
+    .hover\:shadow-glow:hover {
+      box-shadow: 0 0 20px rgba(59,130,246,0.6);
+    }
+    .smooth-transition {
+      transition: all 0.3s ease;
+    }
+    .text-success { color: #22c55e; }
+    .border-success { border-color: #22c55e; }
+    .text-warning { color: #f59e0b; }
+    .border-warning { border-color: #f59e0b; }
+    .border-muted-foreground { border-color: #6b7280; }
+    .text-muted-foreground { color: #9ca3af; }
+    .border-destructive { border-color: #ef4444; }
+    .bg-destructive { background-color: #ef4444; }
+    .text-accent { color: #06b6d4; }
+    .border-accent { border-color: #06b6d4; }
+    .bg-accent { background-color: #06b6d4; }
+
+    /* Sidebar collapse */
+    .collapsed .sidebar-text { display: none; }
+    .collapsed .sidebar { width: 4rem; }
+    .sidebar { width: 16rem; transition: width 0.3s ease; }
+  </style>
+</head>
+<body class="min-h-screen flex w-full bg-gray-950 text-gray-100">
+
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar bg-gray-800 border-r border-gray-700 flex flex-col">
+    <div class="border-b border-gray-700 p-4 flex items-center justify-between">
+      <a href="landing.html" class="flex items-center space-x-2">
+        <i data-lucide="bar-chart-4" class="h-8 w-8 text-blue-400"></i>
+        <div class="sidebar-text">
+          <h2 class="text-lg font-bold text-blue-400">Mood Metrics</h2>
+          <p class="text-xs text-gray-400">Emotion Intelligence</p>
+        </div>
+      </a>
+      <button id="toggleSidebar" class="p-2 rounded-md border border-gray-600 hover:bg-gray-700">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 px-2 py-4 overflow-y-auto">
+      <p class="text-xs font-semibold text-gray-400 mb-2 sidebar-text">Main Navigation</p>
+      <ul class="space-y-1">
+        <li><a href="dashboard.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="layout-dashboard" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Dashboard</span></a></li>
+        <li><a href="Text.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 bg-gray-700"><i data-lucide="file-text" class="h-4 w-4 mr-2  text-blue-400"></i><span class="sidebar-text">Text Analysis</span></a></li>
+        <li><a href="Speech.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="mic" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Speech Analysis</span></a></li>
+        <li><a href="Video_new.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="video" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Video Analysis</span></a></li>
+        <li><a href="testing bot/templates/chatbot.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="message-square" class="h-4 w-4 mr-2"></i><span class="sidebar-text">AI Chatbot</span></a></li>
+        <li><a href="analytics.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="bar-chart-3" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Analytics</span></a></li>
+      </ul>
+      <p class="text-xs font-semibold text-gray-400 mt-6 mb-2 sidebar-text">Account</p>
+      <ul class="space-y-1">
+        <li><a href="settings.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="settings" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Settings</span></a></li>
+        <li><a href="profile.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="user" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Profile</span></a></li>
+      </ul>
+    </div>
+
+    <div class="border-t border-gray-700 p-4">
+      <button class="flex items-center w-full px-3 py-2 rounded hover:bg-red-900 text-red-400">
+        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i>
+        <span class="sidebar-text">Sign Out</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6 space-y-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold flex items-center">
+          <i data-lucide="file-text" class="w-8 h-8 mr-3 text-blue-400"></i>
+          Text Emotion Analysis
+        </h1>
+        <p class="text-muted-foreground mt-1">Analyze emotions and sentiment in text content with AI precision</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button class="px-4 py-2 rounded bg-gradient-primary hover:shadow-glow smooth-transition text-white font-medium">
+          New Analysis
+        </button>
+      </div>
+    </div>
+
+    <!-- Input + Results -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Text Input -->
+      <div class="bg-gradient-card border border-gray-800 rounded-xl shadow p-6 space-y-4 hover:shadow-lg smooth-transition">
+        <h2 class="text-lg font-semibold">Text Input</h2>
+        <p class="text-sm text-muted-foreground">Enter or paste the text you want to analyze for emotional content</p>
+        <textarea id="input-text" class="w-full min-h-[200px] p-3 border border-gray-700 rounded-lg bg-gray-950 text-gray-100 placeholder-gray-500" placeholder="Enter your text here..."></textarea>
+        <div class="flex items-center justify-between">
+          <span id="char-count" class="text-sm text-muted-foreground">0 characters</span>
+          <button id="analyze-btn" class="bg-gradient-primary text-white px-4 py-2 rounded-lg hover:shadow-glow smooth-transition">Analyze Emotions</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="bg-gradient-card border border-gray-800 rounded-xl shadow p-6 hover:shadow-lg smooth-transition">
+        <h2 class="text-lg font-semibold">Emotion Analysis Results</h2>
+        <p class="text-sm text-muted-foreground mb-4">AI-detected emotions and confidence scores</p>
+
+        <div id="results" class="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:justify-start lg:space-x-10 gap-6">
+  
+  <!-- Donut Chart -->
+  <div class="relative w-full lg:w-1/2 flex items-center justify-center">
+    <canvas id="emotionPieChart" class="max-w-xs w-full"></canvas>
+  </div>
+
+  <!-- Legend / Percentages -->
+  <div id="chartAndLegend" class="flex flex-col items-start space-y-3 w-full lg:w-auto lg:ml-6">
+
+    <!-- Legend items dynamically inserted here via JS -->
+  </div>
+
+</div>
+
+</div>
+
+      </div>
+    </div>
+
+    <!-- Detailed Analysis -->
+    <div class="bg-gradient-card border border-gray-800 rounded-xl shadow p-6 hover:shadow-lg smooth-transition">
+      <h2 class="text-lg font-semibold mb-4">Detailed Analysis</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="text-center p-4 rounded-lg bg-gray-950">
+          <div id="overall-sentiment" class="text-2xl font-bold text-success">Positive</div>
+          <div class="text-sm text-muted-foreground">Overall Sentiment</div>
+        </div>
+        <div class="text-center p-4 rounded-lg bg-gray-950">
+          <div id="confidence-score" class="text-2xl font-bold text-accent">7.8/10</div>
+          <div class="text-sm text-muted-foreground">Confidence Score</div>
+        </div>
+        <div class="text-center p-4 rounded-lg bg-gray-950">
+          <div id="emotion-complexity" class="text-2xl font-bold text-warning">Mixed</div>
+          <div class="text-sm text-muted-foreground">Emotion Complexity</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+<script>
+lucide.createIcons();
+
+// --- Element References ---
+const toggleBtn = document.getElementById("toggleSidebar");
+const sidebar = document.getElementById("sidebar");
+const textInput = document.getElementById("input-text");
+const charCount = document.getElementById("char-count");
+const analyzeBtn = document.getElementById("analyze-btn");
+const resultsContainer = document.getElementById("results");
+const overallSentimentEl = document.getElementById("overall-sentiment");
+const confidenceScoreEl = document.getElementById("confidence-score");
+const emotionComplexityEl = document.getElementById("emotion-complexity");
+const emotionPieChartCanvas = document.getElementById("emotionPieChart");
+const legendContainer = document.getElementById("chartAndLegend");
+let myPieChart;
+
+// --- Sidebar toggle ---
+toggleBtn.addEventListener("click", () => {
+  sidebar.classList.toggle("collapsed");
+});
+
+// --- Character count ---
+textInput.addEventListener("input", () => {
+  charCount.textContent = `${textInput.value.length} characters`;
+});
+
+// --- Analyze button ---
+analyzeBtn.addEventListener("click", analyzeText);
+
+async function analyzeText() {
+  const text = textInput.value.trim();
+  if (!text) {
+    alert("Please enter some text to analyze.");
+    return;
+  }
+
+  analyzeBtn.disabled = true;
+  analyzeBtn.textContent = "Analyzing...";
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/analyze-emotion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Analysis failed");
+    }
+
+    const data = await response.json();
+    renderResults(data);
+
+  } catch (error) {
+    alert("Error: " + error.message);
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = "Analyze Emotions";
+  }
+}
+
+// --- Render results ---
+function renderResults(data) {
+  const labels = data.overall_emotions.map(e => e.emotion.charAt(0).toUpperCase() + e.emotion.slice(1));
+  const percentages = data.overall_emotions.map(e => e.percentage);
+  const backgroundColors = data.overall_emotions.map(e => getChartColor(e.emotion));
+
+  // Destroy previous chart
+  if (myPieChart) myPieChart.destroy();
+
+  myPieChart = new Chart(emotionPieChartCanvas, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{ data: percentages, backgroundColor: backgroundColors }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Update detailed analysis
+  overallSentimentEl.textContent = data.detailed_analysis.overall_sentiment;
+  confidenceScoreEl.textContent = data.detailed_analysis.confidence_score + "/10";
+  emotionComplexityEl.textContent = data.detailed_analysis.emotion_complexity;
+
+  // Update legend
+  legendContainer.innerHTML = "";
+  data.overall_emotions.forEach(e => {
+    const div = document.createElement("div");
+    div.className = "flex items-center space-x-2";
+
+    const dot = document.createElement("span");
+    dot.className = "w-3 h-3 rounded-full";
+    dot.style.backgroundColor = getChartColor(e.emotion);
+
+    const label = document.createElement("span");
+    label.textContent = `${e.emotion.charAt(0).toUpperCase() + e.emotion.slice(1)}: ${e.percentage}%`;
+
+    div.appendChild(dot);
+    div.appendChild(label);
+    legendContainer.appendChild(div);
+  });
+}
+
+// --- Emotion colors ---
+function getChartColor(emotion) {
+  const colors = {
+    "joy": "#00C853", "love": "#673AB7", "optimism": "#FFAB00", "gratitude": "#2196F3",
+    "pride": "#F50057", "relief": "#00BCD4", "amusement": "#FFD700", "admiration": "#3F51B5",
+    "approval": "#4CAF50", "excitement": "#FF6F00", "caring": "#8BC34A", "anger": "#D50000",
+    "sadness": "#311B92", "fear": "#FF5722", "disappointment": "#757575", "disapproval": "#B71C1C",
+    "disgust": "#009688", "grief": "#5E35B1", "remorse": "#C62828", "annoyance": "#607D8B",
+    "embarrassment": "#E91E63", "nervousness": "#673AB7", "neutral": "#9E9E9E", "surprise": "#00C853",
+    "confusion": "#FF6F00", "curiosity": "#9C27B0", "desire": "#FF4081", "realization": "#2E7D32"
+  };
+  return colors[emotion.toLowerCase()] || "#94a3b8";
+}
+</script>
+
+
+</body>
+</html>

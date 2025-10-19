@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full"> <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mood Metrics - AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* General styles */
+        .bg-gradient-card {
+            background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        }
+        .hover\:shadow-glow:hover {
+            box-shadow: 0 0 20px rgba(59,130,246,0.6);
+        }
+        .smooth-transition { transition: all 0.3s ease; }
+        .text-success { color: #22c55e; }
+        .text-warning { color: #f59e0b; }
+        .text-muted-foreground { color: #9ca3af; }
+        .text-accent { color: #06b6d4; }
+        .bg-success { background-color: #22c55e; }
+        .bg-accent { background-color: #06b6d4; }
+        .bg-sad { background-color: #3b82f6; }
+        .bg-anger { background-color: #ef4444; }
+        .bg-calm { background-color: #facc15; }
+        /* Sidebar collapse */
+        .collapsed .sidebar-text { display: none; }
+        .collapsed .sidebar { width: 4rem; }
+        .sidebar { width: 16rem; transition: width 0.3s ease; }
+        
+        /* Chat container - FIX 2: Removed max-height and ensured 100% height */
+        .chat-container { 
+            max-height: none; 
+            overflow-y: auto; 
+            height: 100%; 
+        } 
+        .user-message { background-color: #06b6d4; color: #0f172a; padding: 0.75rem 1rem; border-radius: 0.75rem; }
+        .bot-message { background-color: #1e293b; color: #fff; padding: 0.75rem 1rem; border-radius: 0.75rem; }
+        
+        /* Stretch sidebar - FIX 3: Added height: 100vh to main for full vertical coverage */
+        body { display: flex; min-height: 100vh; height: 100%; }
+        #sidebar { display: flex; flex-direction: column; height: 100vh; }
+        main { flex-grow: 1; overflow-y: auto; height: 100vh; }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 h-full"> <div id="sidebar" class="sidebar bg-gray-800 border-r border-gray-700 flex flex-col">
+    <div class="border-b border-gray-700 p-4 flex items-center justify-between">
+        <a href="landing.html" class="flex items-center space-x-2">
+            <i data-lucide="bar-chart-4" class="h-8 w-8 text-blue-400"></i>
+            <div class="sidebar-text">
+                <h2 class="text-lg font-bold text-blue-400">Mood Metrics</h2>
+                <p class="text-xs text-gray-400">Emotion Intelligence</p>
+            </div>
+        </a>
+        <button id="toggleSidebar" class="p-2 rounded-md border border-gray-600 hover:bg-gray-700">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </button>
+    </div>
+    <div class="flex-1 px-2 py-4 overflow-y-auto">
+        <p class="text-xs font-semibold text-gray-400 mb-2 sidebar-text">Main Navigation</p>
+        <ul class="space-y-1">
+            <li><a href="dashboard.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="layout-dashboard" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Dashboard</span></a></li>
+            <li><a href="text-analysis.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 "><i data-lucide="file-text" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Text Analysis</span></a></li>
+            <li><a href="speech-analysis.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 "><i data-lucide="mic" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Speech Analysis</span></a></li>
+            <li><a href="video-analysis.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="video" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Video Analysis</span></a></li>
+            <li><a href="chatbot.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 bg-gray-700"><i data-lucide="message-square" class="h-4 w-4 mr-2 text-blue-400"></i><span class="sidebar-text">AI Chatbot</span></a></li>
+            <li><a href="analytics.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="bar-chart-3" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Analytics</span></a></li>
+        </ul>
+        <p class="text-xs font-semibold text-gray-400 mt-6 mb-2 sidebar-text">Account</p>
+        <ul class="space-y-1">
+            <li><a href="settings.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="settings" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Settings</span></a></li>
+            <li><a href="profile.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="user" class="h-4 w-4 mr-2"></i><span class="sidebar-text">Profile</span></a></li>
+        </ul>
+    </div>
+    <div class="border-t border-gray-700 p-4">
+        <button class="flex items-center w-full px-3 py-2 rounded hover:bg-red-900 text-red-400">
+            <i data-lucide="log-out" class="h-4 w-4 mr-2"></i>
+            <span class="sidebar-text">Sign Out</span>
+        </button>
+    </div>
+</div>
+
+<main class="flex-1 p-6 flex flex-col"> <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-bold">AI Emotion Chatbot</h1>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow"> 
+        <div class="lg:col-span-2 flex flex-col bg-gradient-card p-6 rounded-lg hover:shadow-lg smooth-transition h-full">
+            <h2 class="text-xl font-semibold mb-2">Conversation</h2>
+            <p class="text-muted-foreground text-sm mb-4">AI-powered chat with emotion recognition</p>
+            <div id="chatContainer" class="chat-container flex-grow overflow-y-auto space-y-4 p-4 rounded-lg bg-gray-900">
+                <div class="flex items-start bot-message">
+                    <p>Hello! I'm your AI emotion analysis assistant. How are you feeling today?</p>
+                </div>
+            </div>
+            <div class="flex items-center mt-6">
+                <textarea id="chatInput" rows="1" class="flex-grow p-3 bg-gray-800 rounded-lg border border-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none overflow-hidden" placeholder="Type your message..."></textarea>
+                <button id="sendButton" class="ml-4 bg-gradient-primary hover:shadow-glow text-white font-semibold w-12 h-12 rounded-full transition-colors duration-200 flex items-center justify-center">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+        <div class="lg:col-span-1 space-y-6 flex flex-col"> 
+            <div class="bg-gradient-card p-6 rounded-lg hover:shadow-lg smooth-transition flex-shrink-0">
+                <h2 class="text-xl font-semibold mb-4">Live Emotion Analysis</h2>
+                <div id="emotionBars" class="space-y-2 mt-4">
+                    </div>
+            </div>
+            <div class="bg-gradient-card p-6 rounded-lg hover:shadow-lg smooth-transition flex-shrink-0">
+                <h2 class="text-xl font-semibold mb-4">Conversation Insights</h2>
+                <div class="flex items-center space-x-2 mb-2">
+                    <span id="sentimentScore" class="text-3xl font-bold text-accent">--</span>
+                    <span class="text-sm text-muted-foreground">Avg. Sentiment Score</span>
+                </div>
+            </div>
+            <div class="bg-gradient-card p-6 rounded-lg hover:shadow-lg smooth-transition flex-shrink-0">
+                <h2 class="text-xl font-semibold mb-4">AI Suggestions</h2>
+                <p id="aiSuggestions" class="text-sm text-muted-foreground">Type something to get started!</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    lucide.createIcons();
+    const toggleBtn = document.getElementById("toggleSidebar");
+    const sidebar = document.getElementById("sidebar");
+    const sendButton = document.getElementById("sendButton");
+    const chatInput = document.getElementById("chatInput");
+    const chatContainer = document.getElementById("chatContainer");
+    const emotionBarsContainer = document.getElementById("emotionBars");
+    const sentimentScoreDisplay = document.getElementById("sentimentScore");
+    const aiSuggestionsDisplay = document.getElementById("aiSuggestions");
+
+    toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+    });
+
+    // Function to add a message to the chat container
+    function addMessage(message, isUser = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("flex", "items-start");
+        messageDiv.classList.add(isUser ? "user-message" : "bot-message");
+        messageDiv.innerHTML = `<p>${message}</p>`; // Use innerHTML to allow for formatted text
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Function to update the emotion bars
+    function updateEmotionBars(emotions) {
+        // Clear previous bars
+        emotionBarsContainer.innerHTML = "";
+        
+        // Define a mapping from emotion to a color class
+        const emotionColors = {
+            'joy': 'bg-success',
+            'sadness': 'bg-sad',
+            'anger': 'bg-anger',
+            'calm': 'bg-calm'
+        };
+
+        // Create and append a bar for each emotion
+        for (const emotion in emotions) {
+            const percentage = emotions[emotion];
+            const colorClass = emotionColors[emotion] || 'bg-gray-500';
+
+            const listItem = document.createElement("li");
+            listItem.classList.add("text-sm");
+            listItem.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span>${emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
+                    <span class="text-muted-foreground">${percentage}%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div class="${colorClass} h-2 rounded-full" style="width:${percentage}%;"></div>
+                </div>
+            `;
+            emotionBarsContainer.appendChild(listItem);
+        }
+    }
+
+    // Function to handle sending a message
+    async function sendMessage() {
+        const query = chatInput.value.trim();
+        if (!query) return;
+
+        // Display user message
+        addMessage(query, true);
+        chatInput.value = "";
+
+        // Display a temporary "typing" message
+        const typingIndicator = document.createElement("div");
+        typingIndicator.innerHTML = "<p>🤖 Bot is typing...</p>";
+        typingIndicator.classList.add("flex", "items-start", "bot-message");
+        chatContainer.appendChild(typingIndicator);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        try {
+            // Send the query to the Flask server
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query }),
+            });
+
+            const data = await response.json();
+            
+            // Remove the typing indicator
+            chatContainer.removeChild(typingIndicator);
+
+            // Display the bot's response
+            addMessage(data.answer);
+
+            // --- NEW LOGIC: UPDATE UI WITH EMOTION DATA ---
+            if (data.emotions) {
+                updateEmotionBars(data.emotions);
+                // Simple logic for sentiment score and suggestion
+                const topEmotion = Object.keys(data.emotions).reduce((a, b) => data.emotions[a] > data.emotions[b] ? a : b);
+                sentimentScoreDisplay.textContent = data.emotions[topEmotion] / 10;
+                aiSuggestionsDisplay.textContent = getSuggestion(topEmotion, query);
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            // Handle and display error message
+            chatContainer.removeChild(typingIndicator);
+            addMessage("❌ Error: Could not connect to the server.");
+        }
+    }
+
+    // A simple function to provide suggestions based on emotion
+    function getSuggestion(emotion, query) {
+        switch (emotion) {
+            case 'joy':
+                return "That's great to hear! Let's explore what's making you feel this way.";
+            case 'sadness':
+                return "I'm sorry to hear that. I'm here if you'd like to talk more about it.";
+            case 'anger':
+                return "It sounds like you're feeling frustrated. We can talk about how to handle those feelings.";
+            case 'calm':
+                return "A sense of calm is wonderful. What's on your mind?";
+            default:
+                return "Let's continue our conversation.";
+        }
+    }
+
+    // Event listeners for sending the message
+    sendButton.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mood Metrics — Analytics</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* Keep styling consistent with your React theme names */
+    :root{
+      --primary: #60a5fa;     /* blue-400 / primary used in React */
+      --accent: #06b6d4;      /* accent */
+      --success: #10b981;     /* green */
+      --muted: #6b7280;
+      --muted-foreground: #9ca3af;
+      --destructive: #ef4444;
+      --bg: #0f1724;          /* dark background used across app */
+      --card-grad-from: rgba(45, 62, 88, 0.9);
+      --card-grad-to: rgba(26, 40, 71, 0.95)  ;
+    }
+
+    /* App-level */
+    body { background: #071025; color: #e6eef8; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .bg-gradient-card {
+      background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
+    }
+    .bg-gradient-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+    .hover\:shadow-glow:hover { box-shadow: 0 6px 30px rgba(59,130,246,0.12); }
+    .smooth-transition { transition: all 220ms ease; }
+    .text-muted-foreground { color: var(--muted-foreground); }
+    .bg-muted { background: rgba(255,255,255,0.02); }
+    .border-border { border-color: rgba(255,255,255,0.04); }
+    .badge-outline { border: 1px solid rgba(255,255,255,0.06); color: var(--muted-foreground); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 12px; }
+    /* small-chart wrapper to keep charts small */
+    .small-chart { height: 200px; width: 100%; }
+    /* Tab UI */
+    .tabs button { background: transparent; color: var(--muted-foreground); border: none; padding: 0.5rem 0.75rem; border-bottom: 2px solid transparent; }
+    .tabs button.active { color: var(--primary); border-bottom-color: rgba(96,165,250,0.45); }
+    /* progress bar */
+    .progress-track { background: rgba(255,255,255,0.04); height: 8px; border-radius: 999px; overflow:hidden; }
+    .progress-fill { height: 100%; border-radius: 999px; }
+    /* small responsive tweaks */
+    @media (max-width: 1024px) {
+      .sidebar-keep { display:none; } /* hide persistent sidebar on small screens */
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <div class="flex min-h-screen">
+    <!-- SIDEBAR (dark) -->
+    <aside class="w-64 sidebar-keep bg-gray-800 border-r border-gray-700 flex flex-col">
+      <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <i data-lucide="bar-chart-4" class="h-8 w-8 text-blue-400"></i>
+          <div>
+            <h2 class="text-lg font-semibold text-blue-400">Mood Metrics</h2>
+            <p class="text-xs text-muted-foreground">Emotion Intelligence</p>
+          </div>
+        </div>
+        <button id="collapseBtn" class="p-2 rounded-md border border-gray-700 hover:bg-gray-800">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <nav class="flex-1 px-3 py-4 overflow-y-auto">
+        <p class="text-xs font-semibold text-muted-foreground mb-2">Main Navigation</p>
+        <ul class="space-y-1">
+          <li><a href="dashboard.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="layout-dashboard" class="h-4 w-4 mr-3"></i> Dashboard</a></li>
+          <li><a href="Text.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="file-text" class="h-4 w-4 mr-3"></i> Text Analysis</a></li>
+          <li><a href="Speech.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="mic" class="h-4 w-4 mr-3"></i> Speech Analysis</a></li>
+          <li><a href="Video.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="video" class="h-4 w-4 mr-3"></i> Video Analysis</a></li>
+          <li><a href="ai-chatbot.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700"><i data-lucide="message-square" class="h-4 w-4 mr-3"></i> AI Chatbot</a></li>
+          <li><a href="analytics.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 bg-gray-700"><i data-lucide="bar-chart-3" class="h-4 w-4 mr-3 text-blue-400"></i> Analytics</a></li>
+        </ul>
+
+        <p class="text-xs font-semibold text-muted-foreground mt-6 mb-2">Account</p>
+        <ul class="space-y-1">
+          <li><a href="settings.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-800"><i data-lucide="settings" class="h-4 w-4 mr-3"></i> Settings</a></li>
+          <li><a href="profile.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-800"><i data-lucide="user" class="h-4 w-4 mr-3"></i> Profile</a></li>
+        </ul>
+      </nav>
+
+      <div class="border-t border-gray-800 p-4">
+        <button id="signoutBtn" class="flex items-center w-full px-3 py-2 rounded hover:bg-red-900 text-red-400">
+          <i data-lucide="log-out" class="h-4 w-4 mr-3"></i>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6">
+      <!-- Header -->
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h1 class="text-3xl font-bold flex items-center">
+            <i data-lucide="bar-chart-3" class="w-8 h-8 mr-3 text-blue-400"></i>
+            Analytics Dashboard
+          </h1>
+          <p class="text-muted-foreground mt-1">Comprehensive emotion intelligence insights and reports</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <select id="rangeSelect" class="bg-transparent border border-gray-800 text-muted-foreground rounded px-3 py-2">
+            <option value="7d">Last 7 days</option>
+            <option value="30d" selected>Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="1y">Last year</option>
+          </select>
+
+          <button id="exportBtn" class="px-3 py-2 border border-gray-800 rounded hover:bg-gray-800 flex items-center gap-2 text-muted-foreground">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div class="bg-gradient-card border border-border p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-muted-foreground">Total Analyses</div>
+              <div class="text-lg text-muted-foreground text-xs">Last 30 days</div>
+            </div>
+            <i data-lucide="target" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <div class="text-3xl font-semibold text-blue-400 mt-3">15,247</div>
+          <div class="flex items-center text-sm text-success mt-1"><i data-lucide="trending-up" class="w-3 h-3 mr-2 text-success"></i>+12.5% from last month</div>
+          <div class="progress-track mt-3"><div class="progress-fill bg-blue-400" style="width:75%"></div></div>
+        </div>
+
+        <div class="bg-gradient-card border border-border p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-muted-foreground">Active Users</div>
+              <div class="text-xs text-muted-foreground">Current month</div>
+            </div>
+            <i data-lucide="users" class="w-5 h-5 text-accent" style="color:var(--accent)"></i>
+          </div>
+          <div class="text-3xl font-semibold text-accent mt-3">2,834</div>
+          <div class="flex items-center text-sm text-success mt-1"><i data-lucide="trending-up" class="w-3 h-3 mr-2 text-success"></i>+8.2% growth</div>
+          <div class="progress-track mt-3"><div class="progress-fill" style="width:68%; background:var(--accent)"></div></div>
+        </div>
+
+        <div class="bg-gradient-card border border-border p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-muted-foreground">Accuracy Rate</div>
+              <div class="text-xs text-muted-foreground">AI model performance</div>
+            </div>
+            <i data-lucide="brain" class="w-5 h-5 text-success"></i>
+          </div>
+          <div class="text-3xl font-semibold text-success mt-3">98.5%</div>
+          <div class="flex items-center text-sm text-primary mt-1"><i data-lucide="trending-up" class="w-3 h-3 mr-2 text-success"></i>+0.3% improvement</div>
+          <div class="progress-track mt-3"><div class="progress-fill" style="width:98%; background:var(--success)"></div></div>
+        </div>
+
+        <div class="bg-gradient-card border border-border p-4 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-muted-foreground">Processing Time</div>
+              <div class="text-xs text-muted-foreground">Average response</div>
+            </div>
+            <i data-lucide="clock" class="w-5 h-5" style="color:#a78bfa"></i>
+          </div>
+          <div class="text-3xl font-semibold" style="color:#a78bfa; margin-top:0.75rem">150ms</div>
+          <div class="flex items-center text-sm text-success mt-1"><i data-lucide="trending-down" class="w-3 h-3 mr-2 text-success"></i>-5ms faster</div>
+          <div class="progress-track mt-3"><div class="progress-fill" style="width:85%; background:#a78bfa"></div></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs border-b border-gray-800 mb-4">
+        <button class="active" data-tab="overview">Overview</button>
+        <button data-tab="emotions">Emotions</button>
+        <button data-tab="usage">Usage</button>
+        <button data-tab="insights">Insights</button>
+      </div>
+
+      <!-- Tab content -->
+      <section>
+        <!-- Overview -->
+        <div class="tab-content">
+          <div id="overview" class="tab-pane active">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Emotion Trends (small chart) -->
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 class="text-lg font-semibold">Emotion Trends</h3>
+                    <p class="text-sm text-muted-foreground">Monthly emotion analysis results</p>
+                  </div>
+                </div>
+                <div class="small-chart">
+                  <canvas id="emotionChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Daily Usage (small chart) -->
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 class="text-lg font-semibold">Daily Usage</h3>
+                    <p class="text-sm text-muted-foreground">Analysis activity this week</p>
+                  </div>
+                </div>
+                <div class="small-chart">
+                  <canvas id="usageChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity -->
+            
+          </div>
+
+          <!-- Emotions -->
+          <div id="emotions" class="tab-pane hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Emotion Distribution (pie) -->
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 class="text-lg font-semibold">Emotion Distribution</h3>
+                    <p class="text-sm text-muted-foreground">Current month breakdown</p>
+                  </div>
+                </div>
+                <div class="w-2/3 mx-auto small-chart">
+                  <canvas id="emotionPie"></canvas>
+                </div>
+              </div>
+
+              <!-- Top Emotions -->
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 class="text-lg font-semibold">Top Emotions</h3>
+                    <p class="text-sm text-muted-foreground">Most detected emotions this month</p>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 rounded-full bg-blue-400/10 flex items-center justify-center">
+                        <i data-lucide="smile" class="w-4 h-4 text-success"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium">Joy</p>
+                        <p class="text-sm text-muted-foreground">34% of analyses</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="text-sm text-success">+5.2%</div>
+                      <i data-lucide="trending-up" class="w-4 h-4 text-success"></i>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 rounded-full bg-blue-400/10 flex items-center justify-center">
+                        <i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium">Confidence</p>
+                        <p class="text-sm text-muted-foreground">28% of analyses</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="text-sm text-success">+2.1%</div>
+                      <i data-lucide="trending-up" class="w-4 h-4 text-success"></i>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 rounded-full bg-blue-400/10 flex items-center justify-center">
+                        <i data-lucide="heart" class="w-4 h-4 text-purple-400"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium">Calm</p>
+                        <p class="text-sm text-muted-foreground">22% of analyses</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="text-sm text-destructive">-1.3%</div>
+                      <i data-lucide="trending-down" class="w-4 h-4 text-destructive"></i>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 rounded-full bg-blue-400/10 flex items-center justify-center">
+                        <i data-lucide="brain" class="w-4 h-4 text-accent"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium">Excitement</p>
+                        <p class="text-sm text-muted-foreground">16% of analyses</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="text-sm text-success">+8.7%</div>
+                      <i data-lucide="trending-up" class="w-4 h-4 text-success"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Usage -->
+          <div id="usage" class="tab-pane hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <h3 class="font-semibold">Text Analysis</h3>
+                <p class="text-sm text-muted-foreground">Most used feature</p>
+                <div class="text-2xl font-bold mt-3">8,432</div>
+                <div class="progress-track mt-3"><div class="progress-fill" style="width:85%; background:var(--primary)"></div></div>
+              </div>
+
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <h3 class="font-semibold">Speech Analysis</h3>
+                <p class="text-sm text-muted-foreground">Voice emotion detection</p>
+                <div class="text-2xl font-bold mt-3">4,156</div>
+                <div class="progress-track mt-3"><div class="progress-fill" style="width:52%; background:var(--accent)"></div></div>
+              </div>
+
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <h3 class="font-semibold">Video Analysis</h3>
+                <p class="text-sm text-muted-foreground">Facial expression detection</p>
+                <div class="text-2xl font-bold mt-3">2,659</div>
+                <div class="progress-track mt-3"><div class="progress-fill" style="width:35%; background:#a78bfa"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Insights -->
+          <div id="insights" class="tab-pane hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <h3 class="font-semibold mb-2">Key Insights</h3>
+                <p class="text-sm text-muted-foreground">AI-generated analysis insights</p>
+                <div class="mt-3 space-y-3">
+                  <div class="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10">
+                    <p class="font-medium text-blue-400">Peak Activity Hours</p>
+                    <p class="text-sm text-muted-foreground mt-1">Most analyses occur between 9-11 AM and 2-4 PM.</p>
+                  </div>
+                  <div class="p-3 rounded-lg bg-green-500/5 border border-green-500/10">
+                    <p class="font-medium text-success">Positive Trend</p>
+                    <p class="text-sm text-muted-foreground mt-1">Happy emotions increased by 15% this month.</p>
+                  </div>
+                  <div class="p-3 rounded-lg bg-accent/5 border border-accent/10">
+                    <p class="font-medium" style="color:var(--accent)">Usage Pattern</p>
+                    <p class="text-sm text-muted-foreground mt-1">Text analysis remains the most popular feature (55%).</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-card border border-border p-4 rounded-lg">
+                <h3 class="font-semibold mb-2">Recommendations</h3>
+                <p class="text-sm text-muted-foreground">Optimize your emotion analysis</p>
+                <ul class="mt-3 list-disc pl-5 text-sm">
+                  <li>Increase Video Analysis</li>
+                  <li>Schedule Regular Analysis</li>
+                  <li>Export Weekly Reports</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Render Lucide icons
+    lucide.createIcons();
+
+    // Tab logic
+    const tabButtons = document.querySelectorAll('.tabs button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        tabPanes.forEach(p => {
+          p.classList.add('hidden');
+          p.classList.remove('active');
+        });
+        const el = document.getElementById(target);
+        if (el) {
+          el.classList.remove('hidden');
+          el.classList.add('active');
+        }
+      });
+    });
+
+    // Sidebar collapse (simple toggle, keeps UI intact)
+    document.getElementById('collapseBtn').addEventListener('click', () => {
+      const aside = document.querySelector('aside');
+      aside.classList.toggle('hidden');
+      // optional: adjust layout/responsive behavior if needed
+    });
+
+    // Sign out simple handler (redirect placeholder)
+    document.getElementById('signoutBtn').addEventListener('click', () => {
+      // placeholder action: show alert then redirect to index (or login)
+      alert('Signed out (placeholder). Redirecting to home.');
+      window.location.href = '/';
+    });
+
+    // EXPORT button (placeholder)
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      alert('Export started (placeholder).');
+    });
+
+    /* -------------------------
+       Chart.js charts (small & animate once)
+    --------------------------*/
+    // Shared options for "animate once then remain" -> Chart.js default does that.
+    // We create charts on load — they animate (duration) then stop.
+    const emotionCtx = document.getElementById('emotionChart').getContext('2d');
+    const usageCtx = document.getElementById('usageChart').getContext('2d');
+    const pieCtx = document.getElementById('emotionPie').getContext('2d');
+
+    // Data
+    const emotionData = {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [
+        { label:'Happy', data:[45,52,48,61,55,67], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.12)', fill:true, tension:0.3, pointRadius:2 },
+        { label:'Neutral', data:[35,32,28,26,26,20], borderColor:'#6b7280', backgroundColor:'rgba(107,114,128,0.08)', fill:true, tension:0.3, pointRadius:2 },
+        { label:'Sad', data:[12,10,15,8,12,9], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.08)', fill:true, tension:0.3, pointRadius:2 },
+        { label:'Angry', data:[8,6,9,5,7,4], borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.08)', fill:true, tension:0.3, pointRadius:2 }
+      ]
+    };
+
+    const usageData = {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{ label:'Analyses', data:[24,45,38,52,61,28,35], backgroundColor:'#60a5fa' }]
+    };
+
+    const pieData = {
+      labels:['Happy','Neutral','Sad','Angry'],
+      datasets:[{
+        data:[45,30,15,10],
+        backgroundColor:['#10b981','#6b7280','#ef4444','#f97316']
+      }]
+    };
+
+    // Create charts with small size
+    const emotionChart = new Chart(emotionCtx, {
+      type: 'line',
+      data: emotionData,
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.02)' } },
+          y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.02)' } }
+        },
+        animation: { duration: 1400 }
+      }
+    });
+
+    const usageChart = new Chart(usageCtx, {
+      type:'bar',
+      data: usageData,
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins: { legend:{ display:false } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { display:false } },
+          y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.02)' } }
+        },
+        animation: { duration: 1400 }
+      }
+    });
+
+    const emotionPie = new Chart(pieCtx, {
+      type:'pie',
+      data: pieData,
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins: { legend:{ position:'bottom', labels:{ color:'#cbd5e1' } } },
+        animation: { duration: 1200 }
+      }
+    });
+     // Number counter animation
+  function animateCount(id, target) {
+    const element = document.getElementById(id);
+    let count = 0;
+    const duration = 2000; // total animation time (2 seconds)
+    const stepTime = Math.abs(Math.floor(duration / target));
+    const timer = setInterval(() => {
+      count++;
+      element.textContent = count;
+      if (count >= target) clearInterval(timer);
+    }, stepTime);
+  }
+
+  window.addEventListener("load", () => {
+    animateCount("emotionCount", 245);
+    animateCount("usageCount", 83);
+    animateCount("insightCount", 162);
+  });
+
+    // Make charts "small" by limiting parent height (we already set small-chart height in CSS).
+    // They animate once on creation and then stop (Chart.js handles that).
+
+    // Optional: If you want the charts to "move a bit" then stop (tiny bouncing), you could
+    // implement a one-time randomize/transition then set data back. But Chart.js animation above is enough.
+
+  </script>
+</body>
+</html>
